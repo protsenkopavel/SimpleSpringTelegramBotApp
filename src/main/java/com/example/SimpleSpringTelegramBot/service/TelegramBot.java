@@ -1,11 +1,16 @@
 package com.example.SimpleSpringTelegramBot.service;
 
 import com.example.SimpleSpringTelegramBot.config.BotConfig;
+import com.example.SimpleSpringTelegramBot.model.User;
+import com.example.SimpleSpringTelegramBot.model.UserRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.glassfish.grizzly.http.util.TimeStamp;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.commands.SetMyCommands;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.commands.BotCommand;
 import org.telegram.telegrambots.meta.api.objects.commands.scope.BotCommandScopeDefault;
@@ -18,6 +23,8 @@ import java.util.List;
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
 
+    @Autowired
+    private UserRepository userRepository;
     final BotConfig config;
     static final String HELP_TEXT = "This bot is created to demonstrate Spring capabilities\n\n" +
             "You can execute commands from the main menu on the left or by typing a command:\n\n" +
@@ -50,6 +57,7 @@ public class TelegramBot extends TelegramLongPollingBot {
 
             switch (messageText) {
                 case "/start":
+                    registerUser(update.getMessage());
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
                 case "/help":
@@ -59,6 +67,25 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(chatId, "Command wasn't recognized");
             }
         }
+    }
+
+    private void registerUser(Message message) {
+
+        if (userRepository.findById(message.getChatId()).isEmpty()) {
+            long chatId = message.getChatId();
+            var chat = message.getChat();
+
+            User user = new User();
+            user.setChatId(chatId);
+            user.setFirstName(chat.getFirstName());
+            user.setLastName(chat.getLastName());
+            user.setUserName(chat.getUserName());
+            user.setRegisteredAt(new TimeStamp());
+
+            userRepository.save(user);
+            log.info("user saved: " + user);
+        }
+
     }
 
     private void startCommandReceived(long chatId, String name) {
