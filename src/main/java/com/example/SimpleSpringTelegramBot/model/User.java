@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import org.glassfish.grizzly.http.util.TimeStamp;
 
+import java.sql.Timestamp;
+
 @Entity(name = "usersDataTable")
 public class User {
 
@@ -16,7 +18,7 @@ public class User {
 
     private String userName;
 
-    private TimeStamp registeredAt;
+    private Timestamp registeredAt;
 
     public Long getChatId() {
         return chatId;
@@ -50,11 +52,11 @@ public class User {
         this.userName = userName;
     }
 
-    public TimeStamp getRegisteredAt() {
+    public Timestamp getRegisteredAt() {
         return registeredAt;
     }
 
-    public void setRegisteredAt(TimeStamp registeredAt) {
+    public void setRegisteredAt(Timestamp registeredAt) {
         this.registeredAt = registeredAt;
     }
 
